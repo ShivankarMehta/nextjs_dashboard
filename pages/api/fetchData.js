@@ -1,10 +1,8 @@
-import db from "../../public/db";
+import pool from "../../public/db";
 
 export default async (req, res) => {
   try {
-    const rows = await pool.query(
-      "SELECT price FROM dummydatabase.sales_prices;"
-    );
+    const rows = await pool.query("SELECT * FROM dummydatabase.sales_prices;");
     console.log("fetched data from db", rows);
     res.status(200).json({ data: rows });
   } catch (err) {

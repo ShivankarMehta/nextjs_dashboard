@@ -1,28 +1,36 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import series from "./assets/stock-prices";
 
 const ApexChart = () => {
   const [chartData, setChartData] = useState(null);
-  const [data, setData] = useState([]);
+  const [prices, setPrices] = useState([]);
+  const [dates, setDates] = useState([]);
+
   useEffect(() => {
     async function fetchData() {
-      const response = await fetch("/api/fetchData");
+      const response = await fetch("http://localhost:3000/api/fetchData");
       const result = await response.json();
-      setData(result.data);
+      const firstArray = result.data[0];
+      const amount = firstArray.map((item) => parseFloat(item.price));
+      const date = firstArray.map((item) => item.date);
+      setPrices(amount);
+      setDates(date);
     }
     fetchData();
-    if (series && series.monthDataSeries1 && series.monthDataSeries1.prices) {
+  }, []);
+
+  useEffect(() => {
+    if (prices.length > 0 && dates.length > 0) {
       const options = {
         series: [
           {
             name: "STOCK ABC",
-            data: series.monthDataSeries1.prices,
+            data: prices,
           },
         ],
         chart: {
           type: "area",
-          height: "auto", // Make the chart height responsive
+          height: "auto",
           zoom: {
             enabled: false,
           },
@@ -43,7 +51,7 @@ const ApexChart = () => {
         },
         xaxis: {
           type: "datetime",
-          categories: series.monthDataSeries1.dates,
+          categories: dates,
         },
         yaxis: {
           opposite: true,
@@ -62,13 +70,13 @@ const ApexChart = () => {
             options={options}
             series={options.series}
             type="area"
-            height="auto" // Make the chart height responsive
-            width="100%" // Make the chart width responsive
+            height="auto"
+            width="100%"
           />
         </div>
       );
     }
-  }, []);
+  }, [prices, dates]); // Added dependencies to re-render when prices and dates change
 
   return (
     <div className="chart-container max-w-4xl mx-auto my-4">
